@@ -1,16 +1,63 @@
-# React + Vite
+# PokéAPI Evolution Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A small React app for looking up a Pokémon and seeing its complete evolution
+family, including branching paths such as Eevee's. It is intended for players
+and developers who want a quick, visual alternative to following several
+linked API responses by hand.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Searches by Pokémon name or Pokédex number.
+- Displays artwork, types, and evolution paths.
+- Shows common evolution conditions such as level, item, happiness, or time.
+- Presents a readable message when a Pokémon does not exist or the API fails.
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+You need a current Node.js LTS release and npm.
 
-## Expanding the Oxlint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Open the local URL printed by Vite. Other useful commands are:
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+The project has no backend, API key, or environment variables.
+
+## API endpoints
+
+The app uses the public [PokéAPI](https://pokeapi.co/):
+
+- `GET /api/v2/pokemon-species/{name-or-id}` finds the species and provides its
+  evolution-chain URL.
+- `GET /api/v2/evolution-chain/{id}` provides the nested evolution paths and
+  evolution conditions.
+- `GET /api/v2/pokemon/{name}` supplies the Pokédex number, artwork, and types
+  for each member of the family.
+
+These endpoints are used together because no single PokéAPI response contains
+all of the relationship and display data needed by the visualizer.
+
+## Failure handling
+
+A search for a nonexistent Pokémon produces a handled `404` and displays a
+specific message instead of leaving an unhandled rejection or crashed screen.
+Network failures, non-success responses, and unreadable JSON also produce
+user-facing error messages.
+
+## Known limitations
+
+- Only the first evolution method returned for each path is displayed.
+- The label covers common evolution conditions; unusual game-specific rules may
+  be summarized as their trigger rather than described in full.
+- Localized Pokémon names are not supported by PokéAPI's name lookup endpoint.
+- Results are not cached, so a branching family makes one detail request per
+  Pokémon in addition to the species and evolution-chain requests.
+- The app depends on the availability and response format of the public API.
