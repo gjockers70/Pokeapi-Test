@@ -6,21 +6,57 @@ function formatName(name) {
   return name.replaceAll('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
+const named = (value) => formatName(value.name)
+
+const CONDITION_FORMATTERS = [
+  ['base_form', (value) => `From ${named(value)} form`],
+  ['evolved_form', (value) => `Into ${named(value)} form`],
+  ['gender', (value) => ({ 1: 'Female Pokémon', 2: 'Male Pokémon' })[value] ?? `Gender ${value}`],
+  ['held_item', (value) => `Hold ${named(value)}`],
+  ['item', (value) => `Use ${named(value)}`],
+  ['known_move', (value) => `Know ${named(value)}`],
+  ['known_move_type', (value) => `Know a ${named(value)}-type move`],
+  ['location', (value) => `At ${named(value)}`],
+  ['min_affection', (value) => `${value}+ affection`],
+  ['min_beauty', (value) => `${value}+ beauty`],
+  ['min_damage_taken', (value) => `Take at least ${value} damage`],
+  ['min_happiness', (value) => `${value}+ happiness`],
+  ['min_level', (value) => `Reach level ${value}`],
+  ['min_move_count', (value) => `Know at least ${value} moves`],
+  ['min_steps', (value) => `Walk at least ${value} steps`],
+  ['near_special_rock', () => 'Near a special rock'],
+  ['needs_multiplayer', () => 'While connected in multiplayer'],
+  ['needs_overworld_rain', () => 'While it is raining'],
+  ['party_species', (value) => `${named(value)} in the party`],
+  ['party_type', (value) => `${named(value)}-type Pokémon in the party`],
+  ['region', (value) => `In ${named(value)}`],
+  ['relative_physical_stats', (value) => ({ '-1': 'Attack lower than Defense', 0: 'Attack equal to Defense', 1: 'Attack higher than Defense' })[value]],
+  ['time_of_day', (value) => `During the ${value}`],
+  ['trade_species', (value) => `For ${named(value)}`],
+  ['turn_upside_down', () => 'Turn the device upside down'],
+  ['used_move', (value) => `Use ${named(value)}`],
+]
+
+function describeEvolutionMethod(detail) {
+  const trigger = detail.trigger?.name
+  let action = ''
+
+  if (trigger === 'trade') action = 'Trade'
+  else if (trigger === 'level-up' && detail.min_level == null) action = 'Level up'
+  else if (trigger === 'use-item' && !detail.item) action = 'Use an item'
+  else if (trigger && !['level-up', 'use-item'].includes(trigger)) action = formatName(trigger)
+
+  const conditions = CONDITION_FORMATTERS.flatMap(([field, format]) => {
+    const value = detail[field]
+    return value != null && value !== false && value !== '' ? [format(value)] : []
+  })
+
+  return [action, ...conditions].filter(Boolean).join(' · ') || 'Special condition'
+}
+
 function describeEvolution(details) {
-  const detail = details[0]
-  if (!detail) return 'Base Pokémon'
-
-  const conditions = []
-  if (detail.min_level) conditions.push(`Level ${detail.min_level}`)
-  if (detail.item) conditions.push(`Use ${formatName(detail.item.name)}`)
-  if (detail.held_item) conditions.push(`Hold ${formatName(detail.held_item.name)}`)
-  if (detail.min_happiness) conditions.push(`${detail.min_happiness}+ happiness`)
-  if (detail.time_of_day) conditions.push(`During the ${detail.time_of_day}`)
-  if (!conditions.length && detail.trigger?.name) {
-    conditions.push(formatName(detail.trigger.name))
-  }
-
-  return conditions.join(' · ') || 'Special condition'
+  if (!details.length) return ['Base Pokémon']
+  return details.map(describeEvolutionMethod)
 }
 
 function EvolutionNode({ pokemon }) {
@@ -34,7 +70,14 @@ function EvolutionNode({ pokemon }) {
           <small>#{String(pokemon.pokemonId).padStart(4, '0')}</small>
           <h3>{formatName(pokemon.speciesName)}</h3>
           <p>{pokemon.types.map(formatName).join(' / ')}</p>
-          <span>{describeEvolution(pokemon.evolutionDetails)}</span>
+          <ul className="requirements" aria-label="Evolution requirements">
+            {describeEvolution(pokemon.evolutionDetails).map((requirement, index) => (
+              <li key={`${requirement}-${index}`}>
+                {index > 0 && <strong>or </strong>}
+                {requirement}
+              </li>
+            ))}
+          </ul>
         </div>
       </article>
 

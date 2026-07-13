@@ -9,7 +9,7 @@ linked API responses by hand.
 
 - Searches by Pokémon name or Pokédex number.
 - Displays artwork, types, and evolution paths.
-- Shows common evolution conditions such as level, item, happiness, or time.
+- Shows all evolution methods and their conditions, including unusual rules.
 - Presents a readable message when a Pokémon does not exist or the API fails.
 
 ## Run locally
@@ -54,9 +54,8 @@ user-facing error messages.
 
 ## Known limitations
 
-- Only the first evolution method returned for each path is displayed.
-- The label covers common evolution conditions; unusual game-specific rules may
-  be summarized as their trigger rather than described in full.
+- Requirement wording is intentionally concise and may not explain every
+  version-specific game mechanic behind an API value.
 - Localized Pokémon names are not supported by PokéAPI's name lookup endpoint.
 - Results are not cached, so a branching family makes one detail request per
   Pokémon in addition to the species and evolution-chain requests.

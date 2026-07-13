@@ -114,9 +114,14 @@ button:disabled {
 }
 
 .pokemon-card small,
-.pokemon-card span {
+.requirements {
   color: #5e6875;
   font-size: 0.8rem;
+}
+
+.requirements {
+  margin: 6px 0 0;
+  padding-left: 18px;
 }
 
 @media (max-width: 520px) {
